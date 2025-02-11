@@ -1,4 +1,4 @@
-package work.vietdefi.json;
+package work.vietdefi;
 
 public class Main {
     public static void main(String[] args) {
