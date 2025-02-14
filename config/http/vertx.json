@@ -1,0 +1,5 @@
+{
+  "name": "clean",
+  "url_prefix": "/cl",
+  "http_port": 8000
+}
