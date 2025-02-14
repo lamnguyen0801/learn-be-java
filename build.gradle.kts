@@ -18,6 +18,10 @@ dependencies {
     implementation("org.mariadb.jdbc:mariadb-java-client:3.4.1")
     // https://mvnrepository.com/artifact/com.zaxxer/HikariCP
     implementation("com.zaxxer:HikariCP:4.0.3")
+    // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
+    implementation("org.apache.commons:commons-lang3:3.12.0")
+    // https://mvnrepository.com/artifact/commons-codec/commons-codec
+    implementation("commons-codec:commons-codec:1.17.1")
 }
 
 tasks.test {
