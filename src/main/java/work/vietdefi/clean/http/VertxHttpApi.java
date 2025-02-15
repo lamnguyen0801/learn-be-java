@@ -2,6 +2,7 @@ package work.vietdefi.clean.http;
 
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
+import work.vietdefi.clean.http.test.TestApi;
 import work.vietdefi.clean.services.common.SimpleResponse;
 
 /**
@@ -21,6 +22,8 @@ public class VertxHttpApi {
     public static void configAPI(Router router) {
         // Initialize test API route
         testApi(router);
+        // Test API
+        TestApi.configAPI(router);
     }
 
     /**
