@@ -75,4 +75,25 @@ public class VertxServer {
                 .onSuccess(id -> DebugLogger.logger.error("Your Vert.x application is started! ID = {}", id))
                 .onFailure(err -> DebugLogger.logger.error("Unable to start your application", err));
     }
+
+    /**
+     * Stops the Vert.x application and releases resources.
+     * @return A Future that completes when the shutdown succeeds or fails.
+     */
+    public Future<Void> stop() {
+        Promise<Void> promise = Promise.promise();
+
+        vertx.close(ar -> {
+            if (ar.succeeded()) {
+                DebugLogger.logger.error("Vert.x application is stopped");
+                promise.complete();
+            } else {
+                DebugLogger.logger.error("Unable to stop your application", ar.cause());
+                promise.fail(ar.cause());
+            }
+        });
+
+        return promise.future();
+    }
 }
+

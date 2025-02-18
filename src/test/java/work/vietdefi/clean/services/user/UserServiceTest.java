@@ -59,7 +59,6 @@ public class UserServiceTest {
     @Test
     void testRegisterUser() {
         JsonObject response = userService.register(USERNAME, PASSWORD);
-
         assertNotNull(response);
         assertTrue(SimpleResponse.isSuccess(response));
         JsonObject data = response.getAsJsonObject("d");

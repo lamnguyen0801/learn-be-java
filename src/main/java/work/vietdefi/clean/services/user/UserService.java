@@ -1,10 +1,13 @@
 package work.vietdefi.clean.services.user;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import work.vietdefi.clean.services.common.SimpleResponse;
 import work.vietdefi.sql.ISQLJavaBridge;
+
+import java.util.Map;
 
 /**
  * UserService is an implementation of the IUserService interface.
@@ -86,6 +89,8 @@ public class UserService implements IUserService {
             Object insertResult = bridge.insert(insertSql, username, hashedPassword);
             if (insertResult != null) {
                 JsonObject userData = new JsonObject();
+                long userId = ((Number) insertResult).longValue();
+                userData.addProperty("user_id", userId);
                 userData.addProperty("username", username);
 
                 // generate random token and exprire after 24h
@@ -94,7 +99,6 @@ public class UserService implements IUserService {
 
                 // save and update token into db
                 String updateSql = "UPDATE table_name SET token = ?, token_expired = ? WHERE user_id = ?".replace("table_name", table);
-                long userId = ((Number) insertResult).longValue();
                 int updateResult = bridge.update(updateSql, token, tokenExpiration, userId);
                 if(updateResult > 0) {
                     userData.addProperty("token", token);
@@ -134,6 +138,8 @@ public class UserService implements IUserService {
             }
 
             JsonObject dataUser = new JsonObject();
+            long userId = checkResult.get("user_id").getAsLong();
+            dataUser.addProperty("user_id", userId);
             dataUser.addProperty("username", username);
 
             // generate random token and exprire after 24h
@@ -142,7 +148,6 @@ public class UserService implements IUserService {
 
             // save and update token into db
             String updateSql = "UPDATE table_name SET token = ?, token_expired = ? WHERE user_id = ?".replace("table_name", table);
-            long userId = checkResult.get("user_id").getAsLong();
             int updateResult = bridge.update(updateSql, token, tokenExpiration, userId);
             if(updateResult > 0) {
                 dataUser.addProperty("token", token);
@@ -167,21 +172,44 @@ public class UserService implements IUserService {
         try {
             JsonObject dataUser = new JsonObject();
 
-            String checkSql = "SELECT user_id, token_expired FROM table_name WHERE token = ?".replace("table_name", table);
+            String checkSql = "SELECT user_id, username, token_expired FROM table_name WHERE token = ?".replace("table_name", table);
             JsonObject checkResult = bridge.queryOne(checkSql, token);
             if(checkResult == null) {
                 return SimpleResponse.createResponse(10); // wrong token
             } else {
                 long currentTime = System.currentTimeMillis();
                 long expiresAt = checkResult.get("token_expired").getAsLong();
-                dataUser.addProperty("token_expired", expiresAt);
                 if(currentTime > expiresAt) {
                     return SimpleResponse.createResponse(11); // token expires
                 }
             }
 
+            for(Map.Entry<String, JsonElement> entry : checkResult.entrySet()) {
+                String key = entry.getKey();
+                JsonElement value = entry.getValue();
+
+                dataUser.add(key, value);
+            }
             dataUser.addProperty("token", token);
             return SimpleResponse.createResponse(0, dataUser);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public JsonObject get(long user_id) {
+        try {
+            String checkSql = "SELECT * FROM table_name WHERE user_id = ?".replace("table_name", table);
+            JsonObject checkResult = bridge.queryOne(checkSql, user_id);
+
+            if(checkResult != null) {
+                if(checkResult.has("password")) {
+                    checkResult.remove("password");
+                }
+                return SimpleResponse.createResponse(0, checkResult);
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
